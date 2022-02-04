@@ -2,7 +2,11 @@
 title: "Moving Beyond Linearity"
 author: "Carla , Dordor & Hadi"
 date: "2/4/2022"
-output: ioslides_presentation
+output: 
+  ioslides_presentation:
+     
+     logo: back.jpg
+     data-background: back.jpg
 runtime: shiny
 ---
 
@@ -10,7 +14,7 @@ runtime: shiny
 knitr::opts_chunk$set(echo = FALSE)
 ```
 
-## Shiny Presentation
+## Shiny Presentation {data-background=back.jpg data-background-size=cover}
 
 This R Markdown presentation is made interactive using Shiny. The viewers of the presentation can change the assumptions underlying what's presented and see the results immediately. 
 \[ x^n + y^n = z^n \]

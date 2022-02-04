@@ -67,8 +67,13 @@ anova(fitla,fitlb,fitlc,fitld)
 
 fitglm=glm(I(wage>250)~poly(age,3),data=Wage,family=binomial)
 summary(fitglm)
-predglm=predict(fitglm,age=age.grid,se=T)
+predglm=predict(fitglm,list(age=age.grid),se=T)
 se.bandsglm=predglm$fit+cbind(fitglm=0,lower=-2*predglm$se.fit,upper=2*predglm$se.fit)
 se.bandsglm[1:5,]
 
 
+
+
+prob.bands=exp(se.bandsglm)/(1+exp(se.bandsglm))
+matplot(age.grid,prob.bands,col='blue',lwd=c(2,1,1),lty=c(1,1,2),type='l',ylim=c(0,0.1))
+points(jitter(age),I(wage>250)/10,pch='|',cex=0.5)
