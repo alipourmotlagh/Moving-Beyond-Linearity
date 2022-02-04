@@ -1,0 +1,74 @@
+
+#-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_
+#                                                               _
+#                                                               _
+#                                                               _
+#                                                               _
+#                                                               _
+#-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-_-
+
+
+
+install.packages('ISLR')
+
+
+library(ISLR)
+
+
+str(Wage)
+
+
+
+fit=lm(wage~poly(age,4),data=Wage)
+summary(fit)
+
+
+agelims=range(age)
+age.grid=seq(from=agelims[1],to=agelims[2])
+pred=predict(fit,newdata = list(age=age.grid),se=TRUE)
+se.bands=cbind(pred$fit+2*pred$se.fit,pred$fit-2*pred$se.fit)
+plot(age,wage, col='darkgrey')
+lines(age.grid,pred$fit,lwd=2,col='blue')
+matlines(age.grid,se.bands,col='blue',lty=2)
+
+
+
+
+
+
+
+
+fita=lm(wage~age+I(age^2)+I(age^3)+I(age^4),data=Wage)
+summary(fit)
+
+
+agelims=range(age)
+age.grid=seq(from=agelims[1],to=agelims[2])
+preda=predict(fita,newdata = list(age=age.grid),se=TRUE)
+se.bandss=cbind(preda$fit+2*preda$se.fit,preda$fit-2*preda$se.fit)
+plot(age,wage, col='darkgrey')
+lines(age.grid,preda$fit,lwd=2,col='blue')
+matlines(age.grid,se.bandss,col='blue',lty=2)
+
+
+plot(fitted(fit),fitted(fita))
+
+
+
+
+
+fitla=lm(wage~education,data=Wage)
+fitlb=lm(wage~education+age,data=Wage)
+fitlc=lm(wage~education+poly(age,2),data=Wage)
+fitld=lm(wage~education+poly(age,3),data=Wage)
+anova(fitla,fitlb,fitlc,fitld)
+
+
+
+fitglm=glm(I(wage>250)~poly(age,3),data=Wage,family=binomial)
+summary(fitglm)
+predglm=predict(fitglm,age=age.grid,se=T)
+se.bandsglm=predglm$fit+cbind(fitglm=0,lower=-2*predglm$se.fit,upper=2*predglm$se.fit)
+se.bandsglm[1:5,]
+
+
