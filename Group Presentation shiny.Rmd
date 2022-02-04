@@ -1,24 +1,24 @@
 ---
 title: "Moving Beyond Linearity"
-author: "Carla , Dordor & Hadi"
+author: "Carla, Dordor & Hadi"
 date: "2/4/2022"
-output: 
+output:
+  
+      
   ioslides_presentation:
-     
-     logo: back.jpg
-     data-background: back.jpg
+    logo: download.png
+    
 runtime: shiny
 ---
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
+library('prettydoc')
 ```
 
-## Shiny Presentation {data-background=back.jpg data-background-size=cover}
+## Shiny Presentation
 
-This R Markdown presentation is made interactive using Shiny. The viewers of the presentation can change the assumptions underlying what's presented and see the results immediately. 
-\[ x^n + y^n = z^n \]
-To learn more, see [Interactive Documents](http://rmarkdown.rstudio.com/authoring_shiny.html).
+This R Markdown presentation is made interactive using Shiny. The viewers of the presentation can change the assumptions underlying what's presented and see the results immediately. $$ x^n + y^n = z^n $$ To learn more, see [Interactive Documents](http://rmarkdown.rstudio.com/authoring_shiny.html).
 
 ## Interactive Plot
 
@@ -42,14 +42,12 @@ renderPlot({
 
 ## Bullets
 
-- Bullet 1
-- Bullet 2
-- Bullet 3
+-   Bullet 1
+-   Bullet 2
+-   Bullet 3
 
 ## R Output
 
 ```{r cars}
 summary(cars)
 ```
-
-

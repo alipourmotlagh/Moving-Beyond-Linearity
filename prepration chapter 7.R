@@ -130,3 +130,64 @@ anova(gam2a,gam2,test='Chisq')
 par(mfrow=c(1,3))
 lm1=lm(wage~ns(age,df=4)+ns(year,df=4)+education,data=Wage)
 plot.Gam(lm1,se=T)
+
+
+
+
+#data sets of ISLR
+#creditcard default data
+str(Default)
+#orange juice data
+str(OJ)
+#Baseball data
+str(Hitters)
+#The Insurance Company
+str(Caravan)
+#weekly S&P
+str(Weekly)
+#Khan Gens Data
+str(Khan)
+#Credit card Balance
+str(Credit)
+#News and world report
+str(College)
+#Mild atlantic wage data
+str(Wage)
+#Portfolio Data
+str(Portfolio)
+#Sales of child car seat
+str(Carseats)
+#Auto Data set
+str(Auto)
+#NCI 60 Data
+str(NCI60)
+#S&P Market
+str(Smarket)
+
+#MASS 
+library(MASS)
+#
+??'MASS'
+str(Boston)
+#
+str()
+#
+str()
+#
+str()
+#
+str()
+#
+str()
+#
+str()
+#
+str()
+#
+str()
+#
+str()
+#
+str()
+#
+str()
