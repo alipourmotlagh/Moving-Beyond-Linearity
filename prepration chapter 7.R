@@ -9,7 +9,7 @@
 
 
 
-install.packages('ISLR')
+#install.packages('ISLR')
 
 
 library(ISLR)
