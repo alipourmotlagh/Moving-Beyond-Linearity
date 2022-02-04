@@ -63,7 +63,8 @@ fitlc=lm(wage~education+poly(age,2),data=Wage)
 fitld=lm(wage~education+poly(age,3),data=Wage)
 anova(fitla,fitlb,fitlc,fitld)
 
-
+#----------------------------------
+#nonlinear polynomial
 
 fitglm=glm(I(wage>250)~poly(age,3),data=Wage,family=binomial)
 summary(fitglm)
@@ -77,3 +78,32 @@ se.bandsglm[1:5,]
 prob.bands=exp(se.bandsglm)/(1+exp(se.bandsglm))
 matplot(age.grid,prob.bands,col='blue',lwd=c(2,1,1),lty=c(1,1,2),type='l',ylim=c(0,0.1))
 points(jitter(age),I(wage>250)/10,pch='|',cex=0.5)
+
+
+
+#-----------------
+require(splines)
+
+
+fitsp=lm(wage~bs(age,knots=c(25,40,60)),data=Wage)
+plot(age, wage,col='darkgray')
+lines(age.grid,predict(fitsp,list(age=age.grid)),col='darkgreen',lwd=2)
+abline(v=c(25,40,60),lty=2,col='darkgray')
+
+
+
+
+fitsps=smooth.spline(age,wage,df=16)
+lines(fitsps,col='red',lwd=2)
+fitsps
+
+fitspscv=smooth.spline(age,wage,cv=TRUE)
+lines(fitspscv,col='blue',lwd=2)
+fitspscv
+
+
+
+#------------------------------------
+# Additive Model
+#gam package
+
