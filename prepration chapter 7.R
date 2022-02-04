@@ -106,4 +106,27 @@ fitspscv
 #------------------------------------
 # Additive Model
 #gam package
+install.packages('gam')
+require(gam)
+gam1=gam(wage~s(age,df=4)+s(year,df=4)+education,data=Wage)
+par(mfrow=c(1,3))
 
+plot(gam1,se=T)
+
+
+
+gam2=gam(I(wage>250)~s(age,df=4)+s(year,df=4)+education,data=Wage,family=binomial)
+plot(gam2)
+
+gam2a=gam(I(wage>250)~s(age,df=4)+year+education,data=Wage,family=binomial)
+plot(gam2a)
+
+anova(gam2a,gam2,test='Chisq')
+
+
+#--------------------------------
+#natural splines 
+
+par(mfrow=c(1,3))
+lm1=lm(wage~ns(age,df=4)+ns(year,df=4)+education,data=Wage)
+plot.Gam(lm1,se=T)
