@@ -191,3 +191,7 @@ str()
 str()
 #
 str()
+install.packages("caret")
+library(caret)
+?createDataPartition
+
