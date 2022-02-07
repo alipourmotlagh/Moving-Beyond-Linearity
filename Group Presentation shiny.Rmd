@@ -10,12 +10,29 @@ runtime: shiny
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
-library('prettydoc')
+library(prettydoc)
+library(caret)
+library(MASS)
+library(gam)
+library(splines)
+library(ISLR)
+library(Information)
+library(sp)
+library(data.table)
+library(mgcv)
+library(gamair)
+library(mgcv)
+data(mcycle)
+
+
 ```
 
 ## Shiny Presentation
 
-This R Markdown presentation is made interactive using Shiny. The viewers of the presentation can change the assumptions underlying what's presented and see the results immediately. $$ x^n + y^n = z^n $$ To learn more, see [Interactive Documents](http://rmarkdown.rstudio.com/authoring_shiny.html).
+This R Markdown presentation is made interactive using Shiny. The viewers of the presentation can change the assumptions underlying what's presented and see the results immediately. To learn more, see [Interactive Documents](http://rmarkdown.rstudio.com/authoring_shiny.html).
+$$
+\sum_{i = 1}^{n}{( y_i - g(x_i))^2} + \lambda\int g^" (t)^2 dt
+$$
 
 ## Interactive Plot
 
