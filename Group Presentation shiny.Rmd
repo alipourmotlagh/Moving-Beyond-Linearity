@@ -4,7 +4,7 @@ author: "Carla, Dordor & Hadi"
 date: "2/4/2022"
 output:
   ioslides_presentation:
-    logo: download.png
+    logo: s.png
 runtime: shiny
 ---
 
@@ -33,6 +33,61 @@ This R Markdown presentation is made interactive using Shiny. The viewers of the
 $$
 \sum_{i = 1}^{n}{( y_i - g(x_i))^2} + \lambda\int g^" (t)^2 dt
 $$
+
+
+## Fitting linear Model is not good choice!
+
+```{r linear}
+
+
+renderPlot({
+  # Fit a linear model
+lm_mod <- lm(accel~times, data = mcycle)
+# Visualize the model
+termplot(lm_mod, partial.resid = TRUE, se = TRUE)
+})
+
+
+```
+
+
+
+## GAMs for Regression Problem
+
+$$
+y_i=\beta_0+\beta_1X_{i1}+\beta_2X_{i2}+...+\beta_pX_{ip}+\epsilon_i
+$$
+$$
+y_i=\beta_0+\sum_{i = 1}^{p}{f_i(X_{ij} )+\epsilon_i} 
+$$
+
+$$
+= \beta_0+f_1(X_{i1} )+f_2(X_{i2} )+...+f_p(X_{ip} )+\epsilon_i
+$$
+$$
+wage=\beta_0+f_1(year)+f_2(age)+f_3(education)+\epsilon
+$$
+
+## Trade off Flexibility VS Overfitting
+
+```{r gam.flexiblity}
+inputPanel(
+  selectInput("n_breaks", label = "SP",
+              choices = c(0.1, 0.01, 0.001, 0.0001,0.00001,0.000001), selected = 0.1),
+  
+  sliderInput("bw_adjust", label = "Bandwidth adjustment:",
+              min = 1, max = 30, value = 1, step = 1)
+)
+
+renderPlot({
+  gam_mod_s2 <- gam(accel ~ s(times, k = as.numeric(input$bw_adjust)), data = mcycle, sp = as.numeric(input$n_breaks))
+  
+  plot(gam_mod_s2, residuals = TRUE, pch = 1)
+})
+```
+
+
+
 
 ## Interactive Plot
 
