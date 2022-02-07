@@ -27,13 +27,6 @@ data(mcycle)
 
 ```
 
-## Shiny Presentation
-
-This R Markdown presentation is made interactive using Shiny. The viewers of the presentation can change the assumptions underlying what's presented and see the results immediately. To learn more, see [Interactive Documents](http://rmarkdown.rstudio.com/authoring_shiny.html).
-$$
-\sum_{i = 1}^{n}{( y_i - g(x_i))^2} + \lambda\int g^" (t)^2 dt
-$$
-
 
 ## Fitting linear Model is not good choice!
 
@@ -49,6 +42,14 @@ termplot(lm_mod, partial.resid = TRUE, se = TRUE)
 
 
 ```
+
+## GAM Flexibility and interpretibility
+
+GAMs....
+
+$$
+\sum_{i = 1}^{n}{( y_i - g(x_i))^2} + \lambda\int g^" (t)^2 dt
+$$
 
 
 
