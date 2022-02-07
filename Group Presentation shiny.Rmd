@@ -3,8 +3,10 @@ title: "Moving Beyond Linearity"
 author: "Carla, Dordor & Hadi"
 date: "2/4/2022"
 output:
-  ioslides_presentation:
+  ioslides_presentation: 
     logo: s.png
+    widescreen: yes
+    smaller: yes
 runtime: shiny
 ---
 
@@ -26,7 +28,6 @@ data(mcycle)
 
 
 ```
-
 
 ## Fitting linear Model is not good choice!
 
@@ -51,24 +52,6 @@ $$
 \sum_{i = 1}^{n}{( y_i - g(x_i))^2} + \lambda\int g^" (t)^2 dt
 $$
 
-
-
-## GAMs for Regression Problem
-
-$$
-y_i=\beta_0+\beta_1X_{i1}+\beta_2X_{i2}+...+\beta_pX_{ip}+\epsilon_i
-$$
-$$
-y_i=\beta_0+\sum_{i = 1}^{p}{f_i(X_{ij} )+\epsilon_i} 
-$$
-
-$$
-= \beta_0+f_1(X_{i1} )+f_2(X_{i2} )+...+f_p(X_{ip} )+\epsilon_i
-$$
-$$
-wage=\beta_0+f_1(year)+f_2(age)+f_3(education)+\epsilon
-$$
-
 ## Trade off Flexibility VS Overfitting
 
 ```{r gam.flexiblity}
@@ -87,8 +70,37 @@ renderPlot({
 })
 ```
 
+## GAMs for Regression Problem
 
+$$
+y_i=\beta_0+\beta_1X_{i1}+\beta_2X_{i2}+...+\beta_pX_{ip}+\epsilon_i
+$$ $$
+y_i=\beta_0+\sum_{i = 1}^{p}{f_i(X_{ij} )+\epsilon_i} 
+$$
 
+$$
+= \beta_0+f_1(X_{i1} )+f_2(X_{i2} )+...+f_p(X_{ip} )+\epsilon_i
+$$ $$
+wage=\beta_0+f_1(year)+f_2(age)+f_3(education)+\epsilon
+$$
+
+## GAMs for Classification Problem
+
+$$
+log(\frac{p(x)}{1-p(x)})=\beta_0+\beta_1X_1+\beta_2X_2+...+\beta_pX_p
+$$
+
+$$
+log(\frac{p(x)}{1-p(x)})=\beta_0+f_1(X_1)+f_2(X_2)+...+f_p(X_p)
+$$
+
+$$
+log(\frac{p(x)}{1-p(x)})=\beta_0+\beta_1\times year+f_2(age)+f_3(education)
+$$
+
+$$
+p(x)=Pr(wage>250|year,age,education)
+$$
 
 ## Interactive Plot
 
