@@ -45,9 +45,6 @@ termplot(lm_mod, partial.resid = TRUE, se = TRUE,col.res = "purple",lwd.term=4,l
 })
 ```
 
-gam(accel ~ s(times), data = mcycle, method = "REML")$sp
-
-
 ```{r include = TRUE}
 gam_mod <- gam(accel ~ s(times), data = mcycle, method = "REML")
 gam_mod$sp
@@ -75,7 +72,7 @@ inputPanel(
 renderPlot({
   gam_mod_s2 <- gam(accel ~ s(times, k = as.numeric(input$BF)), data = mcycle, sp = as.numeric(input$SP))
   
-  plot(gam_mod_s2, residuals = TRUE, pch = 1)
+  plot(gam_mod_s2, residuals = TRUE, pch = 1,cex=1,shade = TRUE, shade.col = "hotpink")
 })
 ```
 
@@ -89,17 +86,15 @@ $$
 
 $$
 = \beta_0+f_1(X_{i1} )+f_2(X_{i2} )+...+f_p(X_{ip} )+\epsilon_i
-$$ 
+$$
 
 ## GAM for Regression Problem fitting model
-
 
 $$
 FuelConsumption=\beta_0+f_1(weight)+f_2(length)+f_3(price)+\epsilon
 $$
 
-
-``` {r gam.regresion}
+```{r gam.regresion}
 
 
 
@@ -115,7 +110,6 @@ renderPlot({
 
 ```
 
-
 ## GAM for Regression Problem summary
 
 ```{r include = TRUE}
@@ -123,7 +117,6 @@ mod_city <- gam(city.mpg ~ s(weight)+s(length)+s(price),
                 data = mpg, method = "REML")
 summary(mod_city)
 ```
-
 
 ## GAMs for Classification Problem
 
@@ -139,18 +132,13 @@ $$
 log(\frac{p(x)}{1-p(x)})=\beta_0+\beta_1\times year+f_2(age)+f_3(education)
 $$
 
-
-
-
 ## GAMs for Classification Problem
-
 
 $$
 p(x)=Pr(FuelConsumption>24|weight,length,price)
 $$
 
-
-``` {r gam.clasification}
+```{r gam.clasification}
 renderPlot({
       mod_city_log <- gam(I(city.mpg>24) ~ s(weight)+s(length)+s(price), 
                 data = mpg,family=binomial, method = "REML")
@@ -163,7 +151,6 @@ renderPlot({
 
 ```
 
-
 ## GAMs for Classification Problem summary
 
 ```{r include = TRUE}
@@ -172,24 +159,61 @@ mod_city_log <- gam(I(city.mpg>24) ~ s(weight)+s(length)+s(price),
 summary(mod_city_log)
 ```
 
+## Adding qualitative (categorical) variable
 
-## Interactive Plot
+```{r include = TRUE}
+# Fit the model
+        mod_city2 <- gam(city.mpg ~ s(weight) +drive, 
+                     data = mpg, method = "REML")
+summary(mod_city2)
+```
 
-```{r eruptions}
-inputPanel(
-  selectInput("n_breaks", label = "Number of bins:",
-              choices = c(10, 20, 35, 50), selected = 20),
-  
-  sliderInput("bw_adjust", label = "Bandwidth adjustment:",
-              min = 0.2, max = 2, value = 1, step = 0.2)
-)
+## Adding qualitative (categorical) variable plot
+
+```{r outside}
+
 
 renderPlot({
-  hist(faithful$eruptions, probability = TRUE, breaks = as.numeric(input$n_breaks),
-       xlab = "Duration (minutes)", main = "Geyser eruption duration")
   
-  dens <- density(faithful$eruptions, adjust = input$bw_adjust)
-  lines(dens, col = "blue")
+        # Fit the model
+        mod_city2 <- gam(city.mpg ~ s(weight) +drive, 
+                     data = mpg, method = "REML")
+    
+        # Plot the model
+        plot(mod_city2, all.terms = TRUE, pages = 1)
+
+  
+
+})
+```
+
+## Adding qualitative variable to smooth function {style="font_size:15"}
+
+```{r include = TRUE}
+# Fit the model
+        # Fit the model
+        mod_city3 <- gam(city.mpg ~ s(weight,by=drive)+drive, 
+                         data = mpg, method = "REML")
+summary(mod_city3)
+```
+
+## Adding qualitative variable to smooth function Plot
+
+```{r inside}
+
+
+renderPlot({
+  
+
+  
+        # Fit the model
+        mod_city3 <- gam(city.mpg ~ s(weight,by=drive)+drive, 
+                         data = mpg, method = "REML")
+        par(mfrow=c(1,3))
+        # Plot the model
+        plot(mod_city3)
+  
+
 })
 ```
 
