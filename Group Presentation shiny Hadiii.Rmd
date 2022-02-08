@@ -1,0 +1,430 @@
+---
+title: "Moving Beyond Linearity"
+author: "Carla, Dordor & Hadi"
+date: "2/4/2022"
+output:
+  ioslides_presentation: 
+    logo: s.png
+    widescreen: yes
+    smaller: yes
+runtime: shiny
+---
+
+```{css, echo=FALSE}
+H2 {
+  font-size: 24px;
+  font-family:calibri;
+  color:darkred;
+  text-shadow: gray 1px 0 10px;
+}
+```
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(prettydoc)
+library(caret)
+library(MASS)
+library(gam)
+library(splines)
+library(ISLR)
+library(Information)
+library(sp)
+library(data.table)
+library(mgcv)
+library(gamair)
+library(mgcv)
+library(data.table)
+library(Information)
+library(readr)
+library(data.table)
+data(mcycle)
+data(Wage)
+data(mpg)
+
+csale<-fread('csale.csv')
+new_credit_data<-fread('credit.csv')
+dat<-fread('datafortest.csv')
+data(meuse)
+
+```
+
+## Fitting linear Model is not good choice!
+
+```{r linear}
+renderPlot({
+  
+  # Fit a linear model
+lm_mod <- lm(accel~times, data = mcycle)
+# Visualize the model
+termplot(lm_mod, partial.resid = TRUE, se = TRUE,col.res = "purple",lwd.term=4,lty.se=2,lwd.se=2)
+})
+```
+
+```{r include = TRUE}
+gam_mod <- gam(accel ~ s(times), data = mcycle, method = "REML")
+gam_mod$sp
+```
+
+## GAM Flexibility and interpretibility
+
+GAMs....
+
+$$
+\sum_{i = 1}^{n}{( y_i - g(x_i))^2} + \lambda\int g^" (t)^2 dt
+$$
+
+## Trade off Flexibility VS Overfitting
+
+```{r gam.flexiblity}
+inputPanel(
+  selectInput("SP", label = "smoothing parameter",
+              choices = c(0.1, 0.01, 0.001, 0.0001,0.00001,0.000001), selected = 0.1),
+  
+  sliderInput("BF", label = "Number of basis functions",
+              min = 1, max = 50, value = 1, step = 1)
+)
+
+renderPlot({
+  gam_mod_s2 <- gam(accel ~ s(times, k = as.numeric(input$BF)), data = mcycle, sp = as.numeric(input$SP))
+  
+  plot(gam_mod_s2, residuals = TRUE, pch = 1,cex=1,shade = TRUE, shade.col = "hotpink")
+})
+```
+
+## GAMs for Regression Problem
+
+$$
+y_i=\beta_0+\beta_1X_{i1}+\beta_2X_{i2}+...+\beta_pX_{ip}+\epsilon_i
+$$ $$
+y_i=\beta_0+\sum_{i = 1}^{p}{f_i(X_{ij} )+\epsilon_i} 
+$$
+
+$$
+= \beta_0+f_1(X_{i1} )+f_2(X_{i2} )+...+f_p(X_{ip} )+\epsilon_i
+$$
+
+## GAM for Regression Problem fitting model
+
+$$
+FuelConsumption=\beta_0+f_1(weight)+f_2(length)+f_3(price)+\epsilon
+$$
+
+```{r gam.regresion}
+
+
+
+renderPlot({
+      # Fit the model
+      mod_city <- gam(city.mpg ~ s(weight)+s(length)+s(price), 
+                data = mpg, method = "REML")
+      par(mfrow=c(1,3))
+      # Plot the model
+      plot(mod_city,cex=1,shade = TRUE, shade.col = "gray")
+})
+
+
+```
+
+## GAM for Regression Problem summary
+
+```{r include = TRUE}
+mod_city <- gam(city.mpg ~ s(weight)+s(length)+s(price), 
+                data = mpg, method = "REML")
+summary(mod_city)
+```
+
+## GAMs for Classification Problem
+
+$$
+log(\frac{p(x)}{1-p(x)})=\beta_0+\beta_1X_1+\beta_2X_2+...+\beta_pX_p
+$$
+
+$$
+log(\frac{p(x)}{1-p(x)})=\beta_0+f_1(X_1)+f_2(X_2)+...+f_p(X_p)
+$$
+
+$$
+log(\frac{p(x)}{1-p(x)})=\beta_0+\beta_1\times year+f_2(age)+f_3(education)
+$$
+
+## GAMs for Classification Problem
+
+$$
+p(x)=Pr(FuelConsumption>24|weight,length,price)
+$$
+
+```{r gam.clasification}
+renderPlot({
+      mod_city_log <- gam(I(city.mpg>24) ~ s(weight)+s(length)+s(price), 
+                data = mpg,family=binomial, method = "REML")
+
+      par(mfrow=c(1,3))
+      
+      plot(mod_city_log,cex=1,shade = TRUE, shade.col = "green")
+})
+
+
+```
+
+## GAMs for Classification Problem summary
+
+```{r include = TRUE}
+mod_city_log <- gam(I(city.mpg>24) ~ s(weight)+s(length)+s(price), 
+                data = mpg,family=binomial, method = "REML")
+summary(mod_city_log)
+```
+
+## Adding qualitative (categorical) variable
+
+```{r include = TRUE}
+# Fit the model
+        mod_city2 <- gam(city.mpg ~ s(weight) +drive, 
+                     data = mpg, method = "REML")
+summary(mod_city2)
+```
+
+## Adding qualitative (categorical) variable plot
+
+```{r outside}
+renderPlot({
+        # Fit the model
+        mod_city2 <- gam(city.mpg ~ s(weight) +drive, 
+                     data = mpg, method = "REML")
+        # Plot the model
+        plot(mod_city2, all.terms = TRUE, pages = 1,cex=1,shade = TRUE, shade.col = "orange")
+})
+```
+
+## Adding qualitative variable to smooth function {style="font_size:15"}
+
+```{r include = TRUE}
+        mod_city3 <- gam(city.mpg ~ s(weight,by=drive)+drive, 
+                         data = mpg, method = "REML")
+summary(mod_city3)
+```
+
+## Adding qualitative variable to smooth function Plot
+
+```{r inside}
+
+
+renderPlot({
+        # Fit the model
+        mod_city3 <- gam(city.mpg ~ s(weight,by=drive)+drive,data = mpg, method = "REML")
+        par(mfrow=c(1,3))
+        # Plot the model
+        plot(mod_city3,cex=1,shade = TRUE, shade.col = "lightblue")
+})
+```
+
+## Seting the number of basis function
+
+```{r }
+inputPanel(
+  sliderInput("V1", label = "Veriable 1",
+              min = 1, max = 10, value = 3, step = 1),
+  sliderInput("V2", label = "Veriable 2",
+              min = 1, max = 10, value = 3, step = 1),
+  sliderInput("V3", label = "Veriable 3",
+              min = 1, max = 10, value = 3, step = 1),
+  sliderInput("V4", label = "Veriable 4",
+              min = 1, max = 10, value = 3, step = 1)
+)
+
+renderPlot({
+        # Fit the model
+mod <- gam(y ~ s(x0, k = as.numeric(input$V1)) + s(x1, k = as.numeric(input$V2)) +
+             s(x2, k = as.numeric(input$V3)) + s(x3, k = as.numeric(input$V4)),
+           data = dat, method = "REML")
+
+# Check the diagnostics
+gam.check(mod)
+})
+```
+
+
+## comparing V3_k=3
+
+```{r include = TRUE}
+modmod <- gam(y ~ s(x0, k = 3) + s(x1, k = 3) + s(x2, k = 3) + s(x3, k = 3),
+           data = dat, method = "REML")
+summary(modmod)
+```
+
+## comparing V3_k=10
+
+```{r include = TRUE}
+modmod2 <- gam(y ~ s(x0, k = 3) + s(x1, k = 3) + s(x2, k = 10) + s(x3, k = 3),
+            data = dat, method = "REML")
+summary(modmod2)
+
+```
+
+## Checking concurvity on mpg data set
+
+```{r include = TRUE}
+mod_con <- gam(hw.mpg ~ s(length) + s(width) + s(height) + s(weight), 
+           data = mpg, method = "REML")
+
+concurvity(mod_con,full=FALSE)
+
+```
+
+## 3D Models Using Gam Vis
+
+```{r }
+inputPanel(
+  sliderInput("C1", label = "layers",
+              min = 0, max = 3, value = 0, step = 1),
+  sliderInput("C2", label = "rotation",
+              min = 0, max = 365, value = 0, step = 1)
+)
+
+renderPlot({
+# Fit the model
+mod2d <- gam(cadmium ~ s(x, y), data = meuse, method = "REML")
+
+vis.gam(mod2d, view = c("x", "y"), 
+        plot.type = "persp",se = as.numeric(input$C1),theta = as.numeric(input$C2))
+})
+```
+
+## HeatMap Using Gam Vis
+
+
+```{r }
+inputPanel(
+  sliderInput("B1", label = "Too Far",
+              min = 0.05, max = 1, value = 0.05, step = 0.05),
+  sliderInput("B2", label = "Levels",
+              min = 1, max = 30, value = 1, step = 1)
+)
+
+renderPlot({
+# Fit the model
+mod2d <- gam(cadmium ~ s(x, y), data = meuse, method = "REML")
+
+vis.gam(mod2d, view = c("x", "y"), 
+        plot.type = "contour", too.far = as.numeric(input$B1),nlevels=as.numeric(input$B2))
+})
+```
+
+
+## fitting clasification model
+
+```{r include=TRUE}
+log_mod2 <- gam(purchase ~ s(n_acts) + s(bal_crdt_ratio) + 
+                  s(avg_prem_balance) + s(retail_crdt_ratio) +
+                  s(avg_fin_balance)  + s(mortgage_age) +
+                  s(cred_limit),
+                data = csale,
+                family = binomial,
+                method = "REML")
+
+# View the summary
+summary(log_mod2)
+
+
+```
+
+
+
+## prediction and model performance
+
+```{r }
+log_mod2 <- gam(purchase ~ s(n_acts) + s(bal_crdt_ratio) + 
+                  s(avg_prem_balance) + s(retail_crdt_ratio) +
+                  s(avg_fin_balance)  + s(mortgage_age) +
+                  s(cred_limit),
+                data = csale,
+                family = binomial,
+                method = "REML")
+cred_pp<-predict(log_mod2,newdata=csale, type='response')
+csale$predict<- ifelse(cred_pp > 0.5, 1, 0)
+
+confusion_matrix<-table(csale$predict,csale$purchase)
+
+TP<-confusion_matrix[2,2]
+FP<-confusion_matrix[2,1]
+TN<-confusion_matrix[1,1]
+FN<-confusion_matrix[1,2]
+#accuracy
+accuracy<-(TP + TN) / (TP + FP + TN + FN)
+#Errors
+
+err_1<-FP / (TN + FP)
+err_2<-FN / (TP + FN)
+print(paste('Accuracy is eual to =', accuracy))
+print(paste('error Type One is eual to =', err_1))
+print(paste('error Type Two is eual to =', err_2))
+```
+
+
+## Comparing with previous model
+
+```{r }
+inputPanel(
+  selectInput("Models", label = "Models",
+              choices = c('Linear', 'Splines', 'GAMs'), selected = 'Linear'),
+)
+
+renderPlot({
+  if(input$Models=='Linear'){
+    fit<-lm(city.mpg ~ weight+length+price, 
+        data = mpg)
+    summary(fit)
+    par(mfrow=c(1,4))
+    plot(fit,lwd=2,col='blue')
+  } else if(input$Models=='Splines'){
+    fit_b<-lm(city.mpg ~ bs(weight,knots=c(25,40,60))+
+                bs(length,knots=c(25,40,60))+bs(price,knots=c(25,40,60)), 
+        data = mpg)
+    summary(fit_b)
+    par(mfrow=c(1,4))
+    plot(fit_b,lwd=2,col='blue')
+  }else{
+    mod_city_com <- gam(city.mpg ~ s(weight)+s(length)+s(price), 
+                    data = mpg, method = "REML")
+    par(mfrow=c(1,3))
+    summary(mod_city_com)
+    plot(mod_city_com,lwd=2,shade = TRUE, shade.col = "skyblue")
+  }
+  
+  
+})
+```
+
+
+## Comparing with previous model
+
+```{r }
+inputPanel(
+  selectInput("Models", label = "Models",
+              choices = c('Linear', 'Splines', 'GAMs'), selected = 'Linear'),
+)
+
+renderText({
+  if(input$Models=='Linear'){
+    fit<-lm(city.mpg ~ weight+length+price, 
+        data = mpg)
+    summary(fit)
+    par(mfrow=c(1,4))
+    plot(fit,lwd=2,col='blue')
+  } else if(input$Models=='Splines'){
+    fit_b<-lm(city.mpg ~ bs(weight,knots=c(25,40,60))+
+                bs(length,knots=c(25,40,60))+bs(price,knots=c(25,40,60)), 
+        data = mpg)
+    summary(fit_b)
+    par(mfrow=c(1,4))
+    plot(fit_b,lwd=2,col='blue')
+  }else{
+    mod_city_com <- gam(city.mpg ~ s(weight)+s(length)+s(price), 
+                    data = mpg, method = "REML")
+    par(mfrow=c(1,3))
+    summary(mod_city_com)
+    plot(mod_city_com,lwd=2,shade = TRUE, shade.col = "skyblue")
+  }
+  
+  
+})
+```
