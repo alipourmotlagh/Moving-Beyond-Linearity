@@ -19,16 +19,20 @@ str(Wage)
 
 
 
-fit=lm(wage~poly(age,4),data=Wage)
+fit<-lm(wage~poly(age,4),data=Wage)
 summary(fit)
 
+plot(fit)
 
+age<-Wage$age
+wage<-Wage$wage
 agelims=range(age)
 age.grid=seq(from=agelims[1],to=agelims[2])
 pred=predict(fit,newdata = list(age=age.grid),se=TRUE)
 se.bands=cbind(pred$fit+2*pred$se.fit,pred$fit-2*pred$se.fit)
 plot(age,wage, col='darkgrey')
 lines(age.grid,pred$fit,lwd=2,col='blue')
+
 matlines(age.grid,se.bands,col='blue',lty=2)
 
 
@@ -101,18 +105,50 @@ fitspscv=smooth.spline(age,wage,cv=TRUE)
 lines(fitspscv,col='blue',lwd=2)
 fitspscv
 
+#-------------------------------------
+#------------------------------------
 
+
+fit<-lm(city.mpg ~ weight+length+price, 
+        data = mpg)
+summary(fit)
+par(mfrow=c(1,4))
+plot(fit,lwd=2,col='blue')
+
+
+
+fit_b<-lm(city.mpg ~ bs(weight,knots=c(25,40,60))+bs(length,knots=c(25,40,60))+bs(price,knots=c(25,40,60)), 
+        data = mpg)
+summary(fit_b)
+par(mfrow=c(1,4))
+plot(fit_b,lwd=2,col='blue')
+
+
+
+mod_city_com <- gam(city.mpg ~ s(weight)+s(length)+s(price), 
+                    data = mpg, method = "REML")
+par(mfrow=c(1,3))
+sum_mod_city_com<-summary(mod_city_com)
+plot(mod_city_com,lwd=2,shade = TRUE, shade.col = "skyblue")
+
+sum_mod_city_com$residual.df
+sum_mod_city_com<-data.frame(sum_mod_city_com)
+
+#--------------------------------------
 
 #------------------------------------
 # Additive Model
 #gam package
 install.packages('gam')
 require(gam)
-gam1=gam(wage~s(age,df=4)+s(year,df=4)+education,data=Wage)
+Wage$year<-as.integer(Wage$year)
+
+
+gam1<-gam(Wage$wage~s(Wage$year),data=Wage)
 par(mfrow=c(1,3))
 
 plot(gam1,se=T)
-
+str(Wage)
 
 
 gam2=gam(I(wage>250)~s(age,df=4)+s(year,df=4)+education,data=Wage,family=binomial)
