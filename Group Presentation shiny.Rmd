@@ -10,6 +10,15 @@ output:
 runtime: shiny
 ---
 
+```{css, echo=FALSE}
+H2 {
+  font-size: 24px;
+  font-family:calibri;
+  color:darkred;
+  text-shadow: gray 1px 0 10px;
+}
+```
+
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE)
 library(prettydoc)
@@ -25,11 +34,17 @@ library(mgcv)
 library(gamair)
 library(mgcv)
 library(data.table)
+library(Information)
+library(readr)
+library(data.table)
 data(mcycle)
 data(Wage)
 data(mpg)
+
+csale<-fread('csale.csv')
 new_credit_data<-fread('credit.csv')
 dat<-fread('datafortest.csv')
+data(meuse)
 
 ```
 
@@ -104,7 +119,7 @@ renderPlot({
                 data = mpg, method = "REML")
       par(mfrow=c(1,3))
       # Plot the model
-      plot(mod_city)
+      plot(mod_city,cex=1,shade = TRUE, shade.col = "gray")
 })
 
 
@@ -145,7 +160,7 @@ renderPlot({
 
       par(mfrow=c(1,3))
       
-      plot(mod_city_log)
+      plot(mod_city_log,cex=1,shade = TRUE, shade.col = "green")
 })
 
 
@@ -171,27 +186,18 @@ summary(mod_city2)
 ## Adding qualitative (categorical) variable plot
 
 ```{r outside}
-
-
 renderPlot({
-  
         # Fit the model
         mod_city2 <- gam(city.mpg ~ s(weight) +drive, 
                      data = mpg, method = "REML")
-    
         # Plot the model
-        plot(mod_city2, all.terms = TRUE, pages = 1)
-
-  
-
+        plot(mod_city2, all.terms = TRUE, pages = 1,cex=1,shade = TRUE, shade.col = "orange")
 })
 ```
 
 ## Adding qualitative variable to smooth function {style="font_size:15"}
 
 ```{r include = TRUE}
-# Fit the model
-        # Fit the model
         mod_city3 <- gam(city.mpg ~ s(weight,by=drive)+drive, 
                          data = mpg, method = "REML")
 summary(mod_city3)
@@ -203,28 +209,155 @@ summary(mod_city3)
 
 
 renderPlot({
-  
-
-  
         # Fit the model
-        mod_city3 <- gam(city.mpg ~ s(weight,by=drive)+drive, 
-                         data = mpg, method = "REML")
+        mod_city3 <- gam(city.mpg ~ s(weight,by=drive)+drive,data = mpg, method = "REML")
         par(mfrow=c(1,3))
         # Plot the model
-        plot(mod_city3)
-  
-
+        plot(mod_city3,cex=1,shade = TRUE, shade.col = "lightblue")
 })
 ```
 
-## Bullets
+## Seting the number of basis function
 
--   Bullet 1
--   Bullet 2
--   Bullet 3
+```{r }
+inputPanel(
+  sliderInput("V1", label = "Veriable 1",
+              min = 1, max = 10, value = 3, step = 1),
+  sliderInput("V2", label = "Veriable 2",
+              min = 1, max = 10, value = 3, step = 1),
+  sliderInput("V3", label = "Veriable 3",
+              min = 1, max = 10, value = 3, step = 1),
+  sliderInput("V4", label = "Veriable 4",
+              min = 1, max = 10, value = 3, step = 1)
+)
 
-## R Output
+renderPlot({
+        # Fit the model
+mod <- gam(y ~ s(x0, k = as.numeric(input$V1)) + s(x1, k = as.numeric(input$V2)) +
+             s(x2, k = as.numeric(input$V3)) + s(x3, k = as.numeric(input$V4)),
+           data = dat, method = "REML")
 
-```{r cars}
-summary(cars)
+# Check the diagnostics
+gam.check(mod)
+})
 ```
+
+
+## comparing V3_k=3
+
+```{r include = TRUE}
+modmod <- gam(y ~ s(x0, k = 3) + s(x1, k = 3) + s(x2, k = 3) + s(x3, k = 3),
+           data = dat, method = "REML")
+summary(modmod)
+```
+
+## comparing V3_k=10
+
+```{r include = TRUE}
+modmod2 <- gam(y ~ s(x0, k = 3) + s(x1, k = 3) + s(x2, k = 10) + s(x3, k = 3),
+            data = dat, method = "REML")
+summary(modmod2)
+
+```
+
+## Checking concurvity on mpg data set
+
+```{r include = TRUE}
+mod_con <- gam(hw.mpg ~ s(length) + s(width) + s(height) + s(weight), 
+           data = mpg, method = "REML")
+
+concurvity(mod_con,full=FALSE)
+
+```
+
+## 3D Models Using Gam Vis
+
+```{r }
+inputPanel(
+  sliderInput("C1", label = "layers",
+              min = 0, max = 3, value = 0, step = 1),
+  sliderInput("C2", label = "rotation",
+              min = 0, max = 365, value = 0, step = 1)
+)
+
+renderPlot({
+# Fit the model
+mod2d <- gam(cadmium ~ s(x, y), data = meuse, method = "REML")
+
+vis.gam(mod2d, view = c("x", "y"), 
+        plot.type = "persp",se = as.numeric(input$C1),theta = as.numeric(input$C2))
+})
+```
+
+## HeatMap Using Gam Vis
+
+
+```{r }
+inputPanel(
+  sliderInput("B1", label = "Too Far",
+              min = 0.05, max = 1, value = 0.05, step = 0.05),
+  sliderInput("B2", label = "Levels",
+              min = 1, max = 30, value = 1, step = 1)
+)
+
+renderPlot({
+# Fit the model
+mod2d <- gam(cadmium ~ s(x, y), data = meuse, method = "REML")
+
+vis.gam(mod2d, view = c("x", "y"), 
+        plot.type = "contour", too.far = as.numeric(input$B1),nlevels=as.numeric(input$B2))
+})
+```
+
+
+## fitting clasification model
+
+```{r include=TRUE}
+log_mod2 <- gam(purchase ~ s(n_acts) + s(bal_crdt_ratio) + 
+                  s(avg_prem_balance) + s(retail_crdt_ratio) +
+                  s(avg_fin_balance)  + s(mortgage_age) +
+                  s(cred_limit),
+                data = csale,
+                family = binomial,
+                method = "REML")
+
+# View the summary
+summary(log_mod2)
+
+
+```
+
+
+
+## prediction and model performance
+
+```{r }
+log_mod2 <- gam(purchase ~ s(n_acts) + s(bal_crdt_ratio) + 
+                  s(avg_prem_balance) + s(retail_crdt_ratio) +
+                  s(avg_fin_balance)  + s(mortgage_age) +
+                  s(cred_limit),
+                data = csale,
+                family = binomial,
+                method = "REML")
+cred_pp<-predict(log_mod2,newdata=csale, type='response')
+csale$predict<- ifelse(cred_pp > 0.5, 1, 0)
+
+confusion_matrix<-table(csale$predict,csale$purchase)
+
+TP<-confusion_matrix[2,2]
+FP<-confusion_matrix[2,1]
+TN<-confusion_matrix[1,1]
+FN<-confusion_matrix[1,2]
+#accuracy
+accuracy<-(TP + TN) / (TP + FP + TN + FN)
+#Errors
+
+err_1<-FP / (TN + FP)
+err_2<-FN / (TP + FN)
+print(paste('Accuracy is eual to =', accuracy))
+print(paste('error Type One is eual to =', err_1))
+print(paste('error Type Two is eual to =', err_2))
+```
+
+
+
