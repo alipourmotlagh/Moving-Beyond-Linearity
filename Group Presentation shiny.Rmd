@@ -24,24 +24,33 @@ library(data.table)
 library(mgcv)
 library(gamair)
 library(mgcv)
+library(data.table)
 data(mcycle)
-
+data(Wage)
+data(mpg)
+new_credit_data<-fread('credit.csv')
+dat<-fread('datafortest.csv')
 
 ```
 
 ## Fitting linear Model is not good choice!
 
 ```{r linear}
-
-
 renderPlot({
+  
   # Fit a linear model
 lm_mod <- lm(accel~times, data = mcycle)
 # Visualize the model
-termplot(lm_mod, partial.resid = TRUE, se = TRUE)
+termplot(lm_mod, partial.resid = TRUE, se = TRUE,col.res = "purple",lwd.term=4,lty.se=2,lwd.se=2)
 })
+```
+
+gam(accel ~ s(times), data = mcycle, method = "REML")$sp
 
 
+```{r include = TRUE}
+gam_mod <- gam(accel ~ s(times), data = mcycle, method = "REML")
+gam_mod$sp
 ```
 
 ## GAM Flexibility and interpretibility
@@ -56,15 +65,15 @@ $$
 
 ```{r gam.flexiblity}
 inputPanel(
-  selectInput("n_breaks", label = "SP",
+  selectInput("SP", label = "smoothing parameter",
               choices = c(0.1, 0.01, 0.001, 0.0001,0.00001,0.000001), selected = 0.1),
   
-  sliderInput("bw_adjust", label = "Bandwidth adjustment:",
-              min = 1, max = 30, value = 1, step = 1)
+  sliderInput("BF", label = "Number of basis functions",
+              min = 1, max = 50, value = 1, step = 1)
 )
 
 renderPlot({
-  gam_mod_s2 <- gam(accel ~ s(times, k = as.numeric(input$bw_adjust)), data = mcycle, sp = as.numeric(input$n_breaks))
+  gam_mod_s2 <- gam(accel ~ s(times, k = as.numeric(input$BF)), data = mcycle, sp = as.numeric(input$SP))
   
   plot(gam_mod_s2, residuals = TRUE, pch = 1)
 })
@@ -80,9 +89,41 @@ $$
 
 $$
 = \beta_0+f_1(X_{i1} )+f_2(X_{i2} )+...+f_p(X_{ip} )+\epsilon_i
-$$ $$
-wage=\beta_0+f_1(year)+f_2(age)+f_3(education)+\epsilon
+$$ 
+
+## GAM for Regression Problem fitting model
+
+
 $$
+FuelConsumption=\beta_0+f_1(weight)+f_2(length)+f_3(price)+\epsilon
+$$
+
+
+``` {r gam.regresion}
+
+
+
+renderPlot({
+      # Fit the model
+      mod_city <- gam(city.mpg ~ s(weight)+s(length)+s(price), 
+                data = mpg, method = "REML")
+      par(mfrow=c(1,3))
+      # Plot the model
+      plot(mod_city)
+})
+
+
+```
+
+
+## GAM for Regression Problem summary
+
+```{r include = TRUE}
+mod_city <- gam(city.mpg ~ s(weight)+s(length)+s(price), 
+                data = mpg, method = "REML")
+summary(mod_city)
+```
+
 
 ## GAMs for Classification Problem
 
@@ -98,9 +139,39 @@ $$
 log(\frac{p(x)}{1-p(x)})=\beta_0+\beta_1\times year+f_2(age)+f_3(education)
 $$
 
+
+
+
+## GAMs for Classification Problem
+
+
 $$
-p(x)=Pr(wage>250|year,age,education)
+p(x)=Pr(FuelConsumption>24|weight,length,price)
 $$
+
+
+``` {r gam.clasification}
+renderPlot({
+      mod_city_log <- gam(I(city.mpg>24) ~ s(weight)+s(length)+s(price), 
+                data = mpg,family=binomial, method = "REML")
+
+      par(mfrow=c(1,3))
+      
+      plot(mod_city_log)
+})
+
+
+```
+
+
+## GAMs for Classification Problem summary
+
+```{r include = TRUE}
+mod_city_log <- gam(I(city.mpg>24) ~ s(weight)+s(length)+s(price), 
+                data = mpg,family=binomial, method = "REML")
+summary(mod_city_log)
+```
+
 
 ## Interactive Plot
 
