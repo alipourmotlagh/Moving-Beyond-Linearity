@@ -243,6 +243,57 @@ gam.check(mod)
 ```
 
 
+## Seting the number of basis function
+
+```{r }
+inputPanel(
+  sliderInput("V1", label = "Veriable 1",
+              min = 1, max = 10, value = 3, step = 1),
+  sliderInput("V2", label = "Veriable 2",
+              min = 1, max = 10, value = 3, step = 1),
+  sliderInput("V3", label = "Veriable 3",
+              min = 1, max = 10, value = 3, step = 1),
+  sliderInput("V4", label = "Veriable 4",
+              min = 1, max = 10, value = 3, step = 1)
+)
+
+renderPrint({
+        # Fit the model
+mod <- gam(y ~ s(x0, k = as.numeric(input$V1)) + s(x1, k = as.numeric(input$V2)) +
+             s(x2, k = as.numeric(input$V3)) + s(x3, k = as.numeric(input$V4)),
+           data = dat, method = "REML")
+
+# Check the diagnostics
+gam.check(mod)
+})
+
+
+```
+
+## comparing V3_k=3
+
+Formula:
+y ~ s(x0, k = 3) + s(x1, k = 3) + s(x2, k = 3) + s(x3, k = 3)
+Basis dimension (k) checking results. Low p-value (k-index<1) may
+indicate that k is too low, especially if edf is close to k'.
+
+        k'  edf k-index p-value    
+s(x0) 2.00 1.85    1.02    0.53    
+s(x1) 2.00 1.71    0.95    0.23    
+s(x2) 2.00 1.97    0.59  <2e-16 ***
+s(x3) 2.00 1.00    1.01    0.54 
+
+Formula:
+y ~ s(x0, k = 3) + s(x1, k = 3) + s(x2, k = 10) + s(x3, k = 3)
+Basis dimension (k) checking results. Low p-value (k-index<1) may
+indicate that k is too low, especially if edf is close to k'.
+
+        k'  edf k-index p-value
+s(x0) 2.00 1.93    1.00    0.43
+s(x1) 2.00 1.89    0.97    0.31
+s(x2) 9.00 7.37    0.96    0.29
+s(x3) 2.00 1.25    1.04    0.72
+
 ## comparing V3_k=3
 
 ```{r include = TRUE}
@@ -428,3 +479,50 @@ renderText({
   
 })
 ```
+
+
+
+
+## Fitting linear Model is not good choice!
+
+```{r comparings}
+inputPanel(
+  selectInput("Modelss", label = "Models",
+              choices = c('Linear', 'Splines', 'GAMs'), selected = 'Linear'),
+)
+
+
+
+renderPlot({
+  
+  
+  if(input$Modelss=='Linear'){
+            # Fit a linear model
+      lm_mod <- lm(accel~times, data = mcycle)
+      # Visualize the model
+      termplot(lm_mod, partial.resid = TRUE, se = TRUE,col.res = "purple",lwd.term=4,lty.se=2,lwd.se=2)
+      
+  } else if(input$Modelss=='Splines'){
+    fit_b<-lm(accel ~ bs(times,knots=c(15,30))
+                , 
+        data = mcycle)
+    times<-mcycle$times
+    accel<-mcycle$accel
+    timelims=range(times)
+    time.grid=seq(from=timelims[1],to=timelims[2])
+    pred=predict(fit_b,newdata = list(times=time.grid),se=TRUE)
+    plot(times,accel,col="darkgreen")
+    lines(time.grid,pred$fit,lwd=2,col='blue')
+  }else{
+    mod_city_com <- gam(accel ~ s(times), 
+                    data = mcycle, method = "REML")
+    plot(mod_city_com,lwd=2,col='blue',residuals=TRUE)
+    
+  }
+  
+  
+  
+
+})
+```
+
